@@ -31,7 +31,7 @@ async function getMovies () {
     
     let page = 1
     
-    let movie = await fetching(`http://www.omdbapi.com/?s=${reqVal}&page=${page}&apikey=a4a3ad4e`)
+    let movie = await fetching(`https://www.omdbapi.com/?s=${reqVal}&page=${page}&apikey=a4a3ad4e`)
     
     if (movie != undefined) {
         render(movie.Search)
@@ -52,7 +52,7 @@ function more(reqVal, movies, page) {
         next.classList.remove('disable')
         next.addEventListener('click', async () => {
             page++
-            let expand = await fetching(`http://www.omdbapi.com/?s=${reqVal}&page=${page}&apikey=a4a3ad4e`)
+            let expand = await fetching(`https://www.omdbapi.com/?s=${reqVal}&page=${page}&apikey=a4a3ad4e`)
             render(expand.Search);
             clickDetail()
         })
@@ -110,7 +110,7 @@ function clickDetail(){
     req.addEventListener('click', async () => {
         
         let id = req.dataset.idmovie
-        let reqUrl = `http://www.omdbapi.com/?i=${id}&plot=full&apikey=a4a3ad4e`
+        let reqUrl = `https://www.omdbapi.com/?i=${id}&plot=full&apikey=a4a3ad4e`
 
         let detail = await fetching(reqUrl)
 
