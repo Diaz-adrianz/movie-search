@@ -19,16 +19,11 @@ input.addEventListener('keyup', e => {
     }
 })
 
-document.getElementById('banner').onclick = () => {
-    location.reload()
-}
-
 // ============= get movies by input
 async function getMovies () {
     moviesField.innerHTML = '';
 
     let reqVal = input.value.trim()
-    
     let page = 1
     
     let movie = await fetching(`https://www.omdbapi.com/?s=${reqVal}&page=${page}&apikey=a4a3ad4e`)
@@ -178,7 +173,7 @@ function modalTemplate(mov) {
     </section>
 
     <section class="innerinfo">
-        <p><span>Website</span>: <a href="#">${mov.Website}</a></p>
+        <p><span>Website</span>: <a href="#">${mov.Website == undefined ? '-' : mov.Website}</a></p>
     </section>
     <section class="innerinfo">
         ${mov.Ratings.map( r => {
