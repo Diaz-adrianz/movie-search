@@ -17,22 +17,22 @@ window.addEventListener('scroll', function(){
 searchBtn.addEventListener('click', async () => {
 
     moviesArea.innerHTML = '';
-    reqValue = inputUser.value.trim()
-    page = 1
+    reqValue = inputUser.value.trim();
+    page = 1;
 
-    loading[1].style.display = 'flex'
-    await getMovies(reqValue, page)
+    loading[1].style.display = 'flex';
+    await getMovies(reqValue, page);
 })
 inputUser.addEventListener('keyup', async e => {
 
     if ( e.keyCode == 13) {
 
         moviesArea.innerHTML = '';
-        reqValue = inputUser.value.trim()
-        page = 1
+        reqValue = inputUser.value.trim();
+        page = 1;
 
-        loading[1].style.display = 'flex'
-        await getMovies(reqValue, page)
+        loading[1].style.display = 'flex';
+        await getMovies(reqValue, page);
     }
 })
 
@@ -44,21 +44,23 @@ let resultLength;
 // ============= get movies by current value
 async function getMovies (reqValue, page) {
     
-    let url = `https://www.omdbapi.com/?s=${reqValue}&page=${page}&apikey=a4a3ad4e`
+    let url = `https://www.omdbapi.com/?s=${reqValue}&page=${page}&apikey=a4a3ad4e`;
     
-    let movies = await fetching(url)
+    let movies = await fetching(url);
     if (movies != undefined) {
         
-        render(movies.Search)
+        render(movies.Search);
         
-        resultLength = document.querySelectorAll('.movie').length
+        resultLength = document.querySelectorAll('.movie').length;
         if ( resultLength % 10 == 0) {
-            moreBtn.classList.remove('disable')
+            moreBtn.classList.remove('disable');
         } else {
-            moreBtn.classList.add('disable')
+            moreBtn.classList.add('disable');
         }
 
-        clickDetail()
+        clickDetail();
+
+        inputUser.value = '';
     } else {
         return
     }
@@ -78,9 +80,9 @@ moreBtn.addEventListener('click', e => {
 
 // ============== render result
 function render(movie) {
-    let movies = ''
-    movie.forEach( m => movies += template(m))
-    moviesArea.innerHTML += movies
+    let movies = '';
+    movie.forEach( m => movies += template(m));
+    moviesArea.innerHTML += movies;
     return 
 }
 
@@ -90,22 +92,22 @@ function fetching(url) {
     .then( res => {
 
         if ( res.status != 200) {
-            alert('Something wrong i can feel it / this page will be reload')
-            location.reload()
+            alert('Something wrong i can feel it / this page will be reload');
+            location.reload();
 
         } else {
             return res.json()
         }
     })
     .then( data => {
-        loading.forEach( m => m.style.display = 'none')
+        loading.forEach( m => m.style.display = 'none');
 
         if ( data.Response == 'False' ) {
-            resMsg.classList.add('show-alert')
-            resMsg.lastElementChild.textContent = `" ${data.Error} "`
+            resMsg.classList.add('show-alert');
+            resMsg.lastElementChild.textContent = `" ${data.Error} "`;
 
             setTimeout( () => {
-                resMsg.classList.remove('show-alert')
+                resMsg.classList.remove('show-alert');
             }, 3000)
             return
 
@@ -116,30 +118,30 @@ function fetching(url) {
 }
 
 // ================= get detail
-const modalWrap = document.getElementById('modal')
-const modalPop = document.getElementById('modal-pop')
+const modalWrap = document.getElementById('modal');
+const modalPop = document.getElementById('modal-pop');
 
 function clickDetail(){
-  const reqDetail = document.querySelectorAll('.movie')
+  const reqDetail = document.querySelectorAll('.movie');
 
   reqDetail.forEach( req => {
     req.addEventListener('click', async () => {
         
-        let id = req.dataset.idmovie
-        let url = `https://www.omdbapi.com/?i=${id}&plot=full&apikey=a4a3ad4e`
+        let id = req.dataset.idmovie;
+        let url = `https://www.omdbapi.com/?i=${id}&plot=full&apikey=a4a3ad4e`;
 
         loading[0].style.display = 'flex';
-        let detail = await fetching(url)
+        let detail = await fetching(url);
 
         let modal = '';
-        modal += modalTemplate(detail)
+        modal += modalTemplate(detail);
 
         modalWrap.innerHTML = modal;
-        modalPop.classList.add('show')
+        modalPop.classList.add('show');
 
         document.getElementById('close-modal')
           .addEventListener('click', function(){
-            modalPop.classList.remove('show')
+            modalPop.classList.remove('show');
           })
       })
     })
@@ -150,7 +152,7 @@ function clickDetail(){
 function template(dat) {
     return `<div class="movie" data-idmovie='${dat.imdbID}'>
         <div class="type-ribbon">${dat.Type}</div>
-            <img src="${dat.Poster}">
+            <img src="${dat.Poster == 'N/A' ? 'gambar/thumb.png' : dat.Poster}">
             <div class="title">
             <p>${dat.Title}</p>
             <p>${dat.Year}</p>
@@ -165,7 +167,7 @@ function modalTemplate(mov) {
     <p id="a-type">${mov.Type}</p>  
     </div>
 
-    <img src="${mov.Poster}" alt="">
+    <img src="${mov.Poster == 'N/A' ? 'gambar/thumb.png' : mov.Poster}" alt="">
     
     <section class="info">
     <h2 id="a-jptitle">${mov.Title}</h2>
