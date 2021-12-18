@@ -1,68 +1,86 @@
+// =============== element 
 const searchBtn = document.getElementById('searchit')
-const moviesField = document.getElementById('movies')
-const input = document.getElementById('input-field')
-const next = document.getElementById('expand-more')
-const alertBox = document.getElementById('alert')
+const moviesArea = document.getElementById('movies')
+const inputUser = document.getElementById('input-field')
+const moreBtn = document.getElementById('expand-more')
+const resMsg = document.getElementById('alert')
+const loading = document.querySelectorAll('.spinner')
 
 
-// trigger header 
+// =========== trigger header 
 const header = document.querySelector('header')
 window.addEventListener('scroll', function(){ 
     header.classList.toggle('scrolll', window.scrollY)
 })
 
 // =========== input listener 
-searchBtn.addEventListener('click', getMovies)
-input.addEventListener('keyup', e => {
+searchBtn.addEventListener('click', async () => {
+
+    moviesArea.innerHTML = '';
+    reqValue = inputUser.value.trim()
+    page = 1
+
+    loading[1].style.display = 'flex'
+    await getMovies(reqValue, page)
+})
+inputUser.addEventListener('keyup', async e => {
+
     if ( e.keyCode == 13) {
-        getMovies()
+
+        moviesArea.innerHTML = '';
+        reqValue = inputUser.value.trim()
+        page = 1
+
+        loading[1].style.display = 'flex'
+        await getMovies(reqValue, page)
     }
 })
 
-// ============= get movies by input
-async function getMovies () {
-    moviesField.innerHTML = '';
+// ================ current value 
+let reqValue;
+let page;
+let resultLength;
 
-    let reqVal = input.value.trim()
-    let page = 1
+// ============= get movies by current value
+async function getMovies (reqValue, page) {
     
-    let movie = await fetching(`https://www.omdbapi.com/?s=${reqVal}&page=${page}&apikey=a4a3ad4e`)
+    let url = `https://www.omdbapi.com/?s=${reqValue}&page=${page}&apikey=a4a3ad4e`
     
-    if (movie != undefined) {
-        render(movie.Search)
-    
-        let movies = document.querySelectorAll('.movie')
-        more(reqVal, movies, page)
+    let movies = await fetching(url)
+    if (movies != undefined) {
         
+        render(movies.Search)
+        
+        resultLength = document.querySelectorAll('.movie').length
+        if ( resultLength % 10 == 0) {
+            moreBtn.classList.remove('disable')
+        } else {
+            moreBtn.classList.add('disable')
+        }
+
         clickDetail()
-        input.value = ''
     } else {
         return
     }
 }
+// =================== more button 
+moreBtn.addEventListener('click', e => {
+    page += 1;
+    if ( resultLength % 10 == 0 ) {
+        console.log( 'halaman ' + page)
 
-// ============= more / pagination
-function more(reqVal, movies, page) {
-    if (movies.length >= 10) {
-        next.classList.remove('disable')
-        next.addEventListener('click', async () => {
-            page++
-            let expand = await fetching(`https://www.omdbapi.com/?s=${reqVal}&page=${page}&apikey=a4a3ad4e`)
-            render(expand.Search);
-            clickDetail()
-        })
+        loading[2].style.display = 'flex';
+        getMovies(reqValue, page);
     } else {
-        next.classList.add('disable')
         return
     }
-
-}
+})
 
 // ============== render result
 function render(movie) {
     let movies = ''
     movie.forEach( m => movies += template(m))
-    moviesField.innerHTML += movies
+    moviesArea.innerHTML += movies
     return 
 }
 
@@ -70,29 +88,31 @@ function render(movie) {
 function fetching(url) {
     return fetch(url)
     .then( res => {
-        console.log(res.status)
+
         if ( res.status != 200) {
             alert('Something wrong i can feel it / this page will be reload')
             location.reload()
-            return
+
         } else {
             return res.json()
-
         }
     })
     .then( data => {
-        console.log(data)
+        loading.forEach( m => m.style.display = 'none')
+
         if ( data.Response == 'False' ) {
-            alertBox.classList.add('show-alert')
-            alertBox.lastElementChild.textContent = `" ${data.Error} "`
+            resMsg.classList.add('show-alert')
+            resMsg.lastElementChild.textContent = `" ${data.Error} "`
+
             setTimeout( () => {
-                alertBox.classList.remove('show-alert')
+                resMsg.classList.remove('show-alert')
             }, 3000)
             return
+
         } else if ( data.Response == 'True' )  {
             return data
         }
-    })
+    }) 
 }
 
 // ================= get detail
@@ -101,13 +121,15 @@ const modalPop = document.getElementById('modal-pop')
 
 function clickDetail(){
   const reqDetail = document.querySelectorAll('.movie')
+
   reqDetail.forEach( req => {
     req.addEventListener('click', async () => {
         
         let id = req.dataset.idmovie
-        let reqUrl = `https://www.omdbapi.com/?i=${id}&plot=full&apikey=a4a3ad4e`
+        let url = `https://www.omdbapi.com/?i=${id}&plot=full&apikey=a4a3ad4e`
 
-        let detail = await fetching(reqUrl)
+        loading[0].style.display = 'flex';
+        let detail = await fetching(url)
 
         let modal = '';
         modal += modalTemplate(detail)
@@ -173,7 +195,7 @@ function modalTemplate(mov) {
     </section>
 
     <section class="innerinfo">
-        <p><span>Website</span>: <a href="#">${mov.Website == undefined ? '-' : mov.Website}</a></p>
+        <p><span>Website</span>: <a href="${mov.Website == undefined || 'N/A' ? '#' : mov.Website}">${mov.Website}</a></p>
     </section>
     <section class="innerinfo">
         ${mov.Ratings.map( r => {
